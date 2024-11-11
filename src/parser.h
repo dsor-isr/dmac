@@ -213,6 +213,13 @@ class parser : public dmac::abstract_parser
                 sendSync(msg);
                 break;
             }
+            case DMACPayload::DMAC_ECLK: {
+                /* AT?ECLK */
+                stream << msg->payload << eol_;
+                std::string msg = stream.str();
+                sendSync(msg);
+                break;
+            }
             default:
                 ROS_ERROR_STREAM("" << __func__ << ": unsupported message type: " << msg->type);
                 break;
@@ -443,6 +450,11 @@ class parser : public dmac::abstract_parser
     
     void to_term_net()
     { /* answer_split */
+        
+        // to test if we got a message response to the ECLK command issued
+        static const boost::regex clk_regex("^([^.]*)\\.([^,]*),([^,]*),([^,]*),([^,]*),([^.]*)\\.([^,]*)");
+        boost::smatch clk_matches;
+
         static const boost::regex eol_regex("\r\n");
         
         if (boost::regex_search(more_, eol_regex))
@@ -464,6 +476,16 @@ class parser : public dmac::abstract_parser
                     len = boost::lexical_cast<int>(rcv_matches[6].str().data());
                 }
                 rcv_extract(rcv_matches[1].str(), pid, len, rcv_matches[7].str());
+            }
+            else if (boost::regex_match(more_, clk_matches, clk_regex)) 
+            {
+                static const boost::regex pattern("([^\\r\\n]+)"); // Define the regular expression pattern
+                boost::smatch matches; // Search for matches
+
+                if (boost::regex_search(more_, matches, pattern)) {
+                    // properly process the eclk output and publish to specific topic with DMACClock msg type
+                    eclk(matches[1]);
+                }
             }
             else
             {

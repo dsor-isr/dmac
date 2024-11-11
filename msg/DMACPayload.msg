@@ -7,6 +7,8 @@ uint8 DMAC_IM = 1
 uint8 DMAC_IMS = 2
 # Relative Position (usually assumes valid range and azimuth)
 uint8 DMAC_PBM = 3
+# ECLK message
+uint8 DMAC_ECLK = 4
 
 Header header                           # message header
 
@@ -16,7 +18,7 @@ uint8 destination_address               # destination address
 string source_name
 string destination_name
 
-uint8 type # media access type: BURST/IM/IMS/PBM
+uint8 type # media access type: BURST/IM/IMS/PBM/ECLK
 
 bool ack                                # if the message is to be acknowledged
 bool force                              # if the message is forced to be sent in BACKOFF (requires ack false)
